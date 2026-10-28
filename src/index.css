@@ -1,0 +1,163 @@
+@import "tailwindcss";
+
+/* Tailwind only scans this project by default. The feed lives in wepump/, so its
+   utilities would be missing from the generated CSS unless we point the scanner
+   at the exact files this page renders.
+   NOTE: @source paths resolve relative to THIS file (src/index.css), not the
+   project root — hence ../../. A wrong path here is ignored silently and the
+   borrowed component then renders half-unstyled (giant icons, default text). */
+@source "../../wepump/src/components/sniper/LiveSniperFeed.tsx";
+@source "../../wepump/src/components/tokens/TradingViewChart.tsx";
+
+/* Palette sampled from the reference artwork (measured, not eyeballed):
+   #000000 background (67% of pixels) · #0C0C0C panels (13%) · #F0F0F0 ink
+   #00FF33 neon green. The reference's hot pink was swapped for #FF3355 on
+   request — same saturation family as the green, so buy/sell read as one system. */
+@theme {
+  --font-sans: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-pixel: 'Press Start 2P', 'IBM Plex Mono', ui-monospace, monospace;
+
+  --color-brand: #00ff33;
+  --color-brand-bright: #4dff70;
+  --color-panel: #0c0c0c;
+  --color-ink: #f0f0f0;
+  --color-danger: #ff3355;
+  --color-muted: #8a8f98;
+  --color-faint: #74787f;
+}
+
+html {
+  background-color: #000000;
+}
+
+body {
+  background-color: #000000;
+  color: #f0f0f0;
+  font-family: var(--font-sans);
+  letter-spacing: 0;
+}
+
+/* Pixel fonts are bitmap-shaped; antialiasing them on macOS turns the edges to
+   mush, which is the one look the reference avoids. */
+.font-pixel {
+  -webkit-font-smoothing: none;
+}
+
+/* Stair-stepped pixel frame.
+   clip-path cuts an element's own border away on the steps, so the outline is
+   made by nesting: outer = frame colour, inner = panel colour, 1px apart. */
+.cs-frame {
+  clip-path: polygon(
+    0 10px, 5px 10px, 5px 5px, 10px 5px, 10px 0,
+    calc(100% - 10px) 0, calc(100% - 10px) 5px, calc(100% - 5px) 5px, calc(100% - 5px) 10px, 100% 10px,
+    100% calc(100% - 10px), calc(100% - 5px) calc(100% - 10px), calc(100% - 5px) calc(100% - 5px),
+    calc(100% - 10px) calc(100% - 5px), calc(100% - 10px) 100%,
+    10px 100%, 10px calc(100% - 5px), 5px calc(100% - 5px), 5px calc(100% - 10px), 0 calc(100% - 10px)
+  );
+}
+
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #1f1f1f #000000;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  overscroll-behavior-x: contain;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #000000;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #1f1f1f;
+  transition: background 0.2s ease;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #00ff33;
+}
+
+/* Palette + type remap over the borrowed WePump feed.
+   LiveSniperFeed hardcodes WePump's mint (#14F195), its red (#FF6B6B) and its
+   charcoal panels. Those compile to Tailwind arbitrary-value utilities, so with
+   no fork of the component the only lever left is re-declaring the same class
+   names here: unlayered rules beat Tailwind's @layer utilities in the cascade,
+   so these win without !important. Selectors mirror Tailwind's own escaping and
+   keep the original scoping (hover / group-hover stay conditional). */
+.cs-board .text-\[\#14F195\] {
+  color: #00ff33;
+}
+.cs-board .hover\:text-\[\#14F195\]:hover {
+  color: #00ff33;
+}
+.cs-board .group:hover .group-hover\:text-\[\#14F195\] {
+  color: #00ff33;
+}
+.cs-board .bg-\[\#14F195\] {
+  background-color: #00ff33;
+}
+.cs-board .bg-\[\#14F195\]\/\[0\.05\] {
+  background-color: rgba(0, 255, 51, 0.05);
+}
+.cs-board .bg-\[\#14F195\]\/\[0\.07\] {
+  background-color: rgba(0, 255, 51, 0.07);
+}
+.cs-board .hover\:bg-\[\#14F195\]\/\[0\.1\]:hover {
+  background-color: rgba(0, 255, 51, 0.1);
+}
+/* Sells take the neon red instead of WePump's soft #FF6B6B salmon. */
+.cs-board .text-\[\#FF6B6B\] {
+  color: #ff3355;
+}
+.cs-board .bg-\[\#FF6B6B\] {
+  background-color: #ff3355;
+}
+.cs-board .bg-\[\#0B0D0F\] {
+  background-color: #0c0c0c;
+}
+.cs-board .bg-\[\#050505\] {
+  background-color: #000000;
+}
+.cs-board .ring-\[\#0D0E10\] {
+  --tw-ring-color: #000000;
+}
+
+/* The section label becomes the reference's bracketed arcade caption. */
+/* No exits from this board. WePump's feed renders an "Open on GMGN"
+   anchor inside its chart popup, and their file is shared source we do not edit
+   from here, so it is suppressed instead: any absolute link inside the board is
+   removed. Unlayered => beats their `display:flex` utility without !important.
+   Catches links WePump adds later too. */
+.cs-board a[href^="http"] {
+  display: none;
+}
+
+/* Coin (mint) addresses are not one-click copyable on this board. The button
+   belongs to WePump's shared feed row, so it is suppressed here rather than
+   edited out of their file. Keyed on that exact title and nothing broader: a
+   :has(svg.lucide-copy) match would also kill the KOL roster's wallet-address
+   copy button, which the board keeps. If WePump ever renames this title the
+   button reappears, so re-check this rule after any feed change. */
+.cs-board button[title="Copy Mint Address"] {
+  display: none;
+}
+
+.cs-board h3 {
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  letter-spacing: 0.08em;
+  color: #f0f0f0;
+}
+.cs-board h3::before {
+  content: '[ ';
+  color: #00ff33;
+}
+.cs-board h3::after {
+  content: ' ]';
+  color: #00ff33;
+}
