@@ -1,13 +1,12 @@
 @import "tailwindcss";
 
-/* Tailwind only scans this project by default. The feed lives in wepump/, so its
-   utilities would be missing from the generated CSS unless we point the scanner
-   at the exact files this page renders.
+/* Tailwind only scans this project by default, so the scanner needs the
+   vendored WePump components this page renders -- otherwise their utilities are
+   missing and the feed shows up half-unstyled.
    NOTE: @source paths resolve relative to THIS file (src/index.css), not the
-   project root — hence ../../. A wrong path here is ignored silently and the
-   borrowed component then renders half-unstyled (giant icons, default text). */
-@source "../../wepump/src/components/sniper/LiveSniperFeed.tsx";
-@source "../../wepump/src/components/tokens/TradingViewChart.tsx";
+   project root, and a wrong path is ignored silently. */
+@source "./vendor/wepump/components/sniper/LiveSniperFeed.tsx";
+@source "./vendor/wepump/components/tokens/TradingViewChart.tsx";
 
 /* Palette sampled from the reference artwork (measured, not eyeballed):
    #000000 background (67% of pixels) · #0C0C0C panels (13%) · #F0F0F0 ink

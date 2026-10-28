@@ -7,18 +7,17 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
-      // The live feed is imported from WePump's own source, not copied. Two apps
-      // cannot disagree about the socket protocol when they run the same component.
-      '@wepump': path.resolve(__dirname, '../wepump/src'),
+      // WePump's feed, chart and KOL roster are vendored under src/vendor/wepump
+      // instead of being reached across sibling directories: a deploy host clones
+      // THIS repo alone, so ../wepump does not exist there and the build dies on
+      // the first import. See src/vendor/wepump/README.md for the sync command.
+      '@wepump': path.resolve(__dirname, 'src/vendor/wepump'),
     },
-    // WePump has its own react/motion/lucide installed. Without dedupe the
-    // imported component would load a second copy of React (19.2.8 beside our
-    // 19.3.1) and crash on the first useState call.
+    // Guards against a transitive dependency pulling a second React copy, which
+    // would crash the feed on its first useState call.
     dedupe: ['react', 'react-dom', 'motion', 'lucide-react'],
   },
   server: {
     port: 5174,
-    // Required because we serve modules out of the sibling wepump/ directory.
-    fs: { allow: [path.resolve(__dirname, '..')] },
   },
 });
